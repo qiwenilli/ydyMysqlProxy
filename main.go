@@ -20,6 +20,15 @@ func main() {
 
 	flag.Parse()
 
+    println(`
+
+    ydyMyqlProxy 0.1 beta
+
+    34214399@qq.com
+
+    `)
+
+
 	if len(*configFile) == 0 {
 		log.Error("must use a config file")
 		return
