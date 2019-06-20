@@ -3,7 +3,8 @@ package proxy
 import (
 	"fmt"
 	. "github.com/siddontang/mixer/mysql"
-	"github.com/siddontang/mixer/sqlparser"
+	// "github.com/siddontang/mixer/sqlparser"
+	"github.com/vitessio/vitess/go/vt/sqlparser"
 	"strings"
 )
 
@@ -14,7 +15,7 @@ func (c *Conn) handleSet(stmt *sqlparser.Set) error {
 		return fmt.Errorf("must set one item once, not %s", nstring(stmt))
 	}
 
-	k := string(stmt.Exprs[0].Name.Name)
+	k := stmt.Exprs[0].Name.String()
 
 	switch strings.ToUpper(k) {
 	case `AUTOCOMMIT`:
@@ -26,15 +27,15 @@ func (c *Conn) handleSet(stmt *sqlparser.Set) error {
 	}
 }
 
-func (c *Conn) handleSetAutoCommit(val sqlparser.ValExpr) error {
-	value, ok := val.(sqlparser.NumVal)
-	if !ok {
-		return fmt.Errorf("set autocommit error")
-	}
-	switch value[0] {
-	case '1':
+func (c *Conn) handleSetAutoCommit(val sqlparser.Expr) error {
+
+	rst := val.(*sqlparser.SQLVal)
+	value := string(rst.Val)
+	//
+	switch value {
+	case "1":
 		c.status |= SERVER_STATUS_AUTOCOMMIT
-	case '0':
+	case "0":
 		c.status &= ^SERVER_STATUS_AUTOCOMMIT
 	default:
 		return fmt.Errorf("invalid autocommit flag %s", value)
@@ -43,13 +44,13 @@ func (c *Conn) handleSetAutoCommit(val sqlparser.ValExpr) error {
 	return c.writeOK(nil)
 }
 
-func (c *Conn) handleSetNames(val sqlparser.ValExpr) error {
-	value, ok := val.(sqlparser.StrVal)
-	if !ok {
-		return fmt.Errorf("set names charset error")
-	}
+func (c *Conn) handleSetNames(val sqlparser.Expr) error {
 
-	charset := strings.ToLower(string(value))
+	rst := val.(*sqlparser.SQLVal)
+	value := string(rst.Val)
+
+	//
+	charset := strings.ToLower(value)
 	cid, ok := CharsetIds[charset]
 	if !ok {
 		return fmt.Errorf("invalid charset %s", charset)

@@ -4,6 +4,8 @@ addr : ":9090"
 user : root
 password :
 
+dbPrefix: work001_
+
 # log level[debug|info|warn|error],default error
 log_level : debug 
 

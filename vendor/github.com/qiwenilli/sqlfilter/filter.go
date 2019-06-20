@@ -63,9 +63,9 @@ func (this *Filter) SqlMain(stmt interface{}) interface{} {
 	case sqlparser.Expr:
 		this.sqlExpr(v)
 	case *sqlparser.SQLVal:
-		println("val")
+		println("sqlfilter: val")
 	default:
-		fmt.Println(reflect.TypeOf(v))
+		fmt.Println("sqlfilter: ", reflect.TypeOf(v))
 	}
 	return stmt
 }

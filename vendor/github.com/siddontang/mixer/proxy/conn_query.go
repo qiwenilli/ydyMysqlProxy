@@ -2,9 +2,10 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/pingcap/parser"
-	"github.com/pingcap/parser/ast"
-	_ "github.com/pingcap/tidb/types/parser_driver"
+	//
+	"github.com/qiwenilli/sqlfilter"
+	"github.com/vitessio/vitess/go/vt/sqlparser"
+
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/mixer/client"
 	. "github.com/siddontang/mixer/mysql"
@@ -14,6 +15,9 @@ import (
 	"sync"
 )
 
+var _sqlFilter = &sqlfilter.Filter{PrefixTableName: ""}
+
+//
 func (c *Conn) handleQuery(sql string) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
@@ -22,34 +26,58 @@ func (c *Conn) handleQuery(sql string) (err error) {
 		}
 	}()
 
-	//qiwen
-	_parser := parser.New()
-	stmt, err := _parser.ParseOneStmt(sql, "", "")
+	//
+	stmt, err := sqlparser.Parse(sql)
 	if err != nil {
 		return fmt.Errorf("statement %s not support now", err)
 	}
 
-	//debug info
+	//qiwen
+    
+    //debug info
 	t := reflect.TypeOf(stmt)
-	log.Debug("exec sql: ", t, " | ", sql)
+	log.Debug("source sql: ", t, " | ", sql)
 
-	switch v := stmt.(type) {
-	case *ast.ShowStmt, *ast.SelectStmt:
+	//add db prefix
+	if c.server.cfg.DbPrefix != "" {
+		_sqlFilter.PrefixTableName = c.server.cfg.DbPrefix
+		_sqlFilter.SqlMain(stmt)
+		sqlBuf := sqlparser.NewTrackedBuffer(nil)
+		stmt.Format(sqlBuf)
+		sql = sqlBuf.String()
+        //
+        log.Debug("targe sql: ", sql)
+	}
+
+    //
+	switch sqlparser.Preview(sql) {
+	case sqlparser.StmtSelect:
 		return c.handleSelect(sql)
-	case *ast.InsertStmt, *ast.UpdateStmt, *ast.DeleteStmt, *ast.AlterTableStmt:
-		return c.handleExec(sql)
-    // case *ast.SetStmt:
-	// 	return c.handleSet(sql)
-	case *ast.BeginStmt:
+	case sqlparser.StmtShow:
+		return c.handleSelect(sql)
+		//使用配置返约束，返回库的约束
+		// return c.handleShow(sql, stmt.(*sqlparser.Show))
+	case sqlparser.StmtBegin:
 		return c.handleBegin()
-	case *ast.RollbackStmt:
+	case sqlparser.StmtRollback:
 		return c.handleRollback()
-	case *ast.CommitStmt:
+	case sqlparser.StmtCommit:
 		return c.handleCommit()
+	case sqlparser.StmtSet:
+		return c.handleSet(stmt.(*sqlparser.Set))
+	// case StmtInsert:
+	// case StmtReplace:
+	// case StmtUpdate:
+	// case StmtDelete:
+	// case StmtDDL:
+	// case StmtStream:
+	// case StmtUse:
+	// case StmtOther:
 	default:
-		return fmt.Errorf("statement %T not support now", v)
+		return c.handleExec(sql)
 	}
 	//qiwen end
+
 	return nil
 }
 

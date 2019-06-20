@@ -4,7 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	. "github.com/siddontang/mixer/mysql"
-	"github.com/siddontang/mixer/sqlparser"
+	// "github.com/siddontang/mixer/sqlparser"
+	"github.com/vitessio/vitess/go/vt/sqlparser"
 	"math"
 	"strconv"
 	"strings"
@@ -62,11 +63,13 @@ func (c *Conn) handleStmtPrepare(sql string) error {
 	case *sqlparser.Insert:
 		tableName = nstring(s.Table)
 	case *sqlparser.Update:
-		tableName = nstring(s.Table)
+		tableName = s.TableExprs[0].(*sqlparser.AliasedTableExpr).Expr.(sqlparser.SimpleTableExpr).(sqlparser.TableName).Name.String()
+		// tableName = nstring(s.Table)
 	case *sqlparser.Delete:
-		tableName = nstring(s.Table)
-	case *sqlparser.Replace:
-		tableName = nstring(s.Table)
+		// tableName = nstring(s.Table)
+		tableName = s.TableExprs[0].(*sqlparser.AliasedTableExpr).Expr.(sqlparser.SimpleTableExpr).(sqlparser.TableName).Name.String()
+	// case *sqlparser.Replace:
+	// 	tableName = nstring(s.Table)
 	default:
 		return fmt.Errorf(`unsupport prepare sql "%s"`, sql)
 	}

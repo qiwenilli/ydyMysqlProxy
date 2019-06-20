@@ -9,7 +9,6 @@ import (
 	"github.com/siddontang/mixer/hack"
 	. "github.com/siddontang/mixer/mysql"
 	"net"
-	"os"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -322,10 +321,10 @@ func (c *Conn) useDB(db string) error {
 
 	//qiwen
 	_sourceDb := db
-	host := os.Getenv("YDY_HOST")
-	if host != "" {
-		_sourceDb = host + "_" + _sourceDb
-	}
+	// host := os.Getenv("YDY_HOST")
+	// if host != "" {
+	// _sourceDb = host + "_" + _sourceDb
+	// }
 	db = "mixer"
 	//end qiwen
 

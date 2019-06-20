@@ -43,6 +43,8 @@ type Config struct {
 	Password string `yaml:"password"`
 	LogLevel string `yaml:"log_level"`
 
+    DbPrefix string `yaml:"dbPrefix"`
+
 	Nodes []NodeConfig `yaml:"nodes"`
 
 	Schemas []SchemaConfig `yaml:"schemas"`
