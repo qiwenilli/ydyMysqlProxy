@@ -33,8 +33,8 @@ func (c *Conn) handleQuery(sql string) (err error) {
 	}
 
 	//qiwen
-    
-    //debug info
+
+	//debug info
 	t := reflect.TypeOf(stmt)
 	log.Debug("source sql: ", t, " | ", sql)
 
@@ -45,11 +45,11 @@ func (c *Conn) handleQuery(sql string) (err error) {
 		sqlBuf := sqlparser.NewTrackedBuffer(nil)
 		stmt.Format(sqlBuf)
 		sql = sqlBuf.String()
-        //
-        log.Debug("targe sql: ", sql)
+		//
+		log.Debug("targe sql: ", sql)
 	}
 
-    //
+	//
 	switch sqlparser.Preview(sql) {
 	case sqlparser.StmtSelect:
 		return c.handleSelect(sql)

@@ -321,10 +321,12 @@ func (c *Conn) useDB(db string) error {
 
 	//qiwen
 	_sourceDb := db
-	// host := os.Getenv("YDY_HOST")
-	// if host != "" {
-	// _sourceDb = host + "_" + _sourceDb
-	// }
+	//
+	if c.server.cfg.DbPrefix != "" && len(db) > len(c.server.cfg.DbPrefix) {
+		if db[0:len(c.server.cfg.DbPrefix)] != c.server.cfg.DbPrefix {
+			_sourceDb = c.server.cfg.DbPrefix + db
+		}
+	}
 	db = "mixer"
 	//end qiwen
 

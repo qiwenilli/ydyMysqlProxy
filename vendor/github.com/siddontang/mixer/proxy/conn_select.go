@@ -5,7 +5,7 @@ import (
 	// "fmt"
 	. "github.com/siddontang/mixer/mysql"
 	// "github.com/siddontang/mixer/sqlparser"
-    // "github.com/vitessio/vitess/go/vt/sqlparser"
+	// "github.com/vitessio/vitess/go/vt/sqlparser"
 	// "strings"
 )
 
