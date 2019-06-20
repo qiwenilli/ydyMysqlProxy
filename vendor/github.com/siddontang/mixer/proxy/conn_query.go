@@ -2,14 +2,12 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/siddontang/mixer/client"
-	. "github.com/siddontang/mixer/mysql"
-	// "github.com/siddontang/mixer/sqlparser"
-	// "github.com/xwb1989/sqlparser"
-	// "strconv"
 	"github.com/pingcap/parser"
 	"github.com/pingcap/parser/ast"
 	_ "github.com/pingcap/tidb/types/parser_driver"
+	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/mixer/client"
+	. "github.com/siddontang/mixer/mysql"
 
 	//
 	"reflect"
@@ -31,14 +29,17 @@ func (c *Conn) handleQuery(sql string) (err error) {
 		return fmt.Errorf("statement %s not support now", err)
 	}
 
+	//debug info
 	t := reflect.TypeOf(stmt)
-	fmt.Println("Type---->:", t, err, sql)
+	log.Debug("exec sql: ", t, " | ", sql)
 
 	switch v := stmt.(type) {
 	case *ast.ShowStmt, *ast.SelectStmt:
 		return c.handleSelect(sql)
-	case *ast.InsertStmt, *ast.UpdateStmt, *ast.DeleteStmt, *ast.SetStmt, *ast.AlterTableStmt:
+	case *ast.InsertStmt, *ast.UpdateStmt, *ast.DeleteStmt, *ast.AlterTableStmt:
 		return c.handleExec(sql)
+    // case *ast.SetStmt:
+	// 	return c.handleSet(sql)
 	case *ast.BeginStmt:
 		return c.handleBegin()
 	case *ast.RollbackStmt:

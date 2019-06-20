@@ -1,0 +1,41 @@
+addr : ":9090"
+
+#
+user : root
+password :
+
+# log level[debug|info|warn|error],default error
+log_level : debug 
+
+nodes :
+- 
+    name : node1 
+    idle_conns : 16
+    # if rw_split is true, select will use slave server
+    rw_split: true
+    
+    master : 192.168.100.114:3306
+    user : jd-php
+    password : jindanlicai.com
+
+    # slave represents a real mysql salve server 
+    slave : 
+
+    # down mysql after N seconds noalive
+    # 0 will no down
+    down_after_noalive : 300
+
+# schema defines which db can be used by client and this db's sql will be executed in which nodes
+schemas :
+-
+    #default db
+    db : mixer 
+    nodes: [node1]
+    rules:
+        # any other table not set above will use default [node1]
+        default: node1
+        shard:
+            # empty shard tables rule
+            -
+
+

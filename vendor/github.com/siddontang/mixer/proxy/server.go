@@ -5,6 +5,7 @@ import (
 	"github.com/siddontang/mixer/config"
 
 	"net"
+	"os"
 	"runtime"
 	"strings"
 )
@@ -31,8 +32,20 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	s.cfg = cfg
 
 	s.addr = cfg.Addr
+	//
+	//
 	s.user = cfg.User
 	s.password = cfg.Password
+	//qiwen
+	user := os.Getenv("YDY_USER")
+	pass := os.Getenv("YDY_PASS")
+	if user != "" {
+		s.user = user
+	}
+	if pass != "" {
+		s.password = pass
+	}
+	//qiwen end
 
 	if err := s.parseNodes(); err != nil {
 		return nil, err
